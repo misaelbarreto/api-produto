@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: api
+  # PODs
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: misaelbarreto/api-bootcamp-produto:v2
+          ports:
+          # Porta do container a ser exposta ao POD.
+          - containerPort: 8080
+          env:
+          - name: MONGODB_URI
+            value: mongodb://mongouser:mongopwd@mongodb-service:27017/admin
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+spec:
+  selector:
+    app: api
+  ports:
+    # Porta do Service
+    # Como a port tem o mesmo valor que targetPort, targetPort não precisava ser definido. Fiz aqui só pra deixar o exemplo.
+  - port: 80
+    # Porta do Container
+    targetPort: 8080
+    # nodePort é a porta que vai ser usada para o bind do nó load balancer do cluster com uma porta do servidor que hospeda o cluster.
+    # Ex:
+    # k3d cluster create meucluster --agents 3 --servers 3 -p "9090:30000@loadbalancer"
+    # http://localhost:9090/api-docs/
+    # Quando a pagina acima for requisitada, na porta 9090, a chamada cai na porta 30000 do nó load balancer que por sua vez
+    # encaminha a requisição para a porta 80 desse service que por sua vez encaminha para a porta 8080 de algum container 
+    # dentro dos PODs.
+    nodePort: 30000
+  # ClusterIp é o default, caso não seja especificado.
+  type: NodePort

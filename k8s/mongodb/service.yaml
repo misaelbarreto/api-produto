@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+spec:
+  selector:
+    app: mongodb
+  ports:
+    # Porta do Service
+    # Como a port tem o mesmo valor que targetPort, targetPort não precisava ser definido. Fiz aqui só pra deixar o exemplo.
+  - port: 27017
+    # Porta do Container
+    targetPort: 27017
+  # ClusterIp é o default, caso não seja especificado.
+  type: ClusterIP
