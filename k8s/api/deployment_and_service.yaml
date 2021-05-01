@@ -47,4 +47,5 @@ spec:
     # dentro dos PODs.
     nodePort: 30000
   # ClusterIp é o default, caso não seja especificado.
-  type: NodePort
+  # LoadBalancer deve ser usado caso estejas usando um "cluster as service". Ex: DigitalOcean, Azure, AWS
+  type: LoadBalancer
