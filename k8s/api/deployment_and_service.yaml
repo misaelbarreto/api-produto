@@ -34,18 +34,30 @@ spec:
     app: api
   ports:
     # Porta do Service
-    # Como a port tem o mesmo valor que targetPort, targetPort não precisava ser definido. Fiz aqui só pra deixar o exemplo.
-  - port: 80
-    # Porta do Container
+    # Obs: 
+    # (1) Se type for LoadBalancer, a porta da URL terá o mesmo valor.
+    # Ex: http://kubernet-as-service:9191/api-docs/
+    #
+    # (2) Se type for do tipo NodePort, a porta da URL será definida no momento da criação do cluster.
+    # Ex:
+    # $ k3d cluster create meucluster --agents 3 --servers 3 -p "[host port]:[nodePort]@loadbalancer"
+    # $ k3d cluster create meucluster --agents 3 --servers 3 -p "9090:30000@loadbalancer"
+    # http://localhost:9090/api-docs/    
+  - port: 9191
+    # Porta do container
+    # Caso o targetPort (container) tenha o mesmo valor de port (service), não precisa ser definido.
     targetPort: 8080
     # nodePort é a porta que vai ser usada para o bind do nó load balancer do cluster com uma porta do servidor que hospeda o cluster.
-    # Ex:
-    # k3d cluster create meucluster --agents 3 --servers 3 -p "9090:30000@loadbalancer"
-    # http://localhost:9090/api-docs/
-    # Quando a pagina acima for requisitada, na porta 9090, a chamada cai na porta 30000 do nó load balancer que por sua vez
-    # encaminha a requisição para a porta 80 desse service que por sua vez encaminha para a porta 8080 de algum container 
-    # dentro dos PODs.
+    # Se nodePort não for especificado, será gerado um valor randômico emtre 30.000 e a 32.767.
     nodePort: 30000
-  # ClusterIp é o default, caso não seja especificado.
-  # LoadBalancer deve ser usado caso estejas usando um "cluster as service". Ex: DigitalOcean, Azure, AWS
+
+  # Tipos de Service:
+  # - ClusterIp é o default, caso não seja especificado, e funciona apenas dentro do cluster. Ex: Pod A precisa acessar o Pod B.
+  # - NodePort deve ser usado para "kubernetes on premisse". 
+  # - LoadBalancer deve ser usado caso estejas usando um "kubernetes as service". Ex: DigitalOcean, Azure, AWS. Nesse caso, a porta
+  # do serviço também será a porta de acesso externo.
   type: LoadBalancer
+
+  # Resumo desta configuração:
+  # Quando a página acima for requisitada, na porta 9191, a chamada cairá na porta 30000 do nó load balancer, que por sua vez encaminhará
+  # a requisição para a porta 9191 desse serviço que, por fim, encaminhará para a porta 8080 de um dos pods desse serviço.
